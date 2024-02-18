@@ -32,16 +32,23 @@ namespace JWTProject.Service.Services
 
             return Convert.ToBase64String(numberByte);
         }
-        private IEnumerable<Claim> GetClaims(UserApp userApp, List<string> audiences)
+        private async Task<IEnumerable<Claim>> GetClaims(UserApp userApp, List<string> audiences)
         {
+            //Role bazlı kimlik doğrulama
+            var userRoles = await _userManager.GetRolesAsync(userApp);
+
             var userList = new List<Claim>()
             {
                 new Claim(ClaimTypes.NameIdentifier,userApp.Id),
                 new Claim(JwtRegisteredClaimNames.Email,userApp.Email),
                 new Claim(ClaimTypes.Name,userApp.UserName),
-                new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString())
+                new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
+                //Claim bazlı kimlik doğrulama
+                new Claim("city",userApp.City),
+                new Claim("birth-date",userApp.BirthDate.ToShortDateString())
             };
             userList.AddRange(audiences.Select(x => new Claim(JwtRegisteredClaimNames.Aud, x)));
+            userList.AddRange(userRoles.Select(x => new Claim(ClaimTypes.Role, x)));
             return userList;
         }
 
@@ -65,7 +72,7 @@ namespace JWTProject.Service.Services
                 issuer: _customTokenOptions.Issuer, //tokeni yayınlayan kim
                 expires: accessTokenExpiration,
                 notBefore: DateTime.Now, //Benim verdiğim dakikadan itibaren geçerli
-                claims: GetClaims(userApp, _customTokenOptions.Audience),
+                claims: GetClaims(userApp, _customTokenOptions.Audience).Result,
                 signingCredentials: credentials);
 
             var handler = new JwtSecurityTokenHandler();

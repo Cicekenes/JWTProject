@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SharedLibrary;
 using SharedLibrary.Extensions;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +24,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers().AddFluentValidation(options =>
 {
-    options.RegisterValidatorsFromAssemblyContaining<Program>();
+    options.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 });
 
 builder.Services.UseCustomValidationResponse();

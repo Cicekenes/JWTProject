@@ -3,6 +3,7 @@ using JWTProject.Core.Services.AbstractService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Formats.Asn1;
 
 namespace JWTProject.API.Controllers
 {
@@ -26,6 +27,12 @@ namespace JWTProject.API.Controllers
         public async Task<IActionResult> GetUser()
         {
             return ActionResultInstance(await _userService.GetUserByNameAsync(HttpContext.User.Identity.Name));
+        }
+
+        [HttpPost("CreateUserRoles/{userName}")]
+        public async Task<IActionResult> CreateUserRoles(string userName)
+        {
+            return ActionResultInstance(await _userService.CreateUserRoles(userName));
         }
     }
 }
